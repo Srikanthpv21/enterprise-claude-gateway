@@ -12,30 +12,33 @@ A production-grade, self-hosted enterprise AI assistant platform built on Node.j
 ## Architecture Overview
 
 ```mermaid
-graph TD
-    Client["Client Browser (Claude-Style SPA)"]
-    
-    subgraph Edge & Security Layer
-        Helmet["Helmet (CSP & HTTP Security Headers)"]
-        Cors["CORS Policy"]
-        RateLimit["Token-Bucket Rate Limiter"]
-        AuthFilter["Auth Guard (JWT / HTTP-Only Cookie)"]
-        QuotaCheck["Budget Guard (Daily Token Quotas)"]
+flowchart TD
+    Client["Client Browser (SPA)"]
+
+    subgraph Security["Edge and Security Layer"]
+        Helmet["Helmet (Security Headers)"]
+        Cors["CORS Filter"]
+        RateLimit["Rate Limiter (Token Bucket)"]
+        AuthGuard["Auth Guard (JWT / Cookie)"]
+        QuotaGuard["Quota Guard (Daily Limits)"]
     end
 
-    subgraph Backend Core
+    subgraph Core["Backend Service"]
         Express["Express API Controller"]
-        DB["Atomic JSON Storage Engine (data/)"]
-        AnthropicSvc["Anthropic SDK Service Layer"]
+        DB["Atomic JSON Storage Engine"]
+        AnthropicSvc["Anthropic SDK Service"]
     end
 
-    subgraph External LLM Provider
-        Claude["Anthropic API (Claude 3.5 Sonnet / Haiku / Opus)"]
+    subgraph Provider["LLM Cloud"]
+        Claude["Anthropic Claude 3.5 API"]
     end
 
-    Client -->|HTTP / REST| Helmet
-    Helmet --> Cors --> RateLimit --> AuthFilter --> QuotaCheck
-    QuotaCheck --> Express
+    Client -->|HTTP Request| Helmet
+    Helmet --> Cors
+    Cors --> RateLimit
+    RateLimit --> AuthGuard
+    AuthGuard --> QuotaGuard
+    QuotaGuard --> Express
     Express <--> DB
     Express -->|Async Context Stream| AnthropicSvc
     AnthropicSvc -->|Messages API| Claude
