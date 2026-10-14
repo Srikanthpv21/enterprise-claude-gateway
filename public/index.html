@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workplace Workspace</title>
+  <meta name="description" content="Internal team workspace." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D97757'><path d='M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z'/></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" id="highlight-theme" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="theme-light">
+  <div id="app" class="app-container">
+
+    <div id="auth-modal" class="auth-modal">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="brand-badge">
+            <svg class="claude-star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" />
+            </svg>
+            <span>Workspace</span>
+          </div>
+          <h2 id="auth-title">Team Portal</h2>
+          <p id="auth-subtitle">Sign in with your email to access your workspace.</p>
+        </div>
+
+        <div id="auth-alert" class="alert-box alert-error hidden"></div>
+
+        <form id="login-form" class="auth-form">
+          <div class="form-group">
+            <label for="login-email">Email Address</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="login-email" placeholder="you@company.com" required autocomplete="email" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="btn-login">
+            <span>Sign In</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <div class="auth-switch">
+            Don't have an account? <a href="#" id="switch-to-register">Create one</a>
+          </div>
+        </form>
+
+        <form id="register-form" class="auth-form hidden">
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="reg-name" placeholder="Alex Morgan" required autocomplete="name" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Work Email</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="reg-email" placeholder="alex@company.com" required autocomplete="email" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password (min 6 characters)</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="reg-password" placeholder="••••••••" minlength="6" required autocomplete="new-password" />
+            </div>
+          </div>
+          <div class="form-group" id="access-code-group">
+            <label for="reg-access-code">Team Access Code</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-key"></i>
+              <input type="text" id="reg-access-code" placeholder="Enter team invite code" autocomplete="off" />
+            </div>
+            <span class="help-text">Ask your team administrator for the workplace invite code.</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="btn-register">
+            <span>Create Account</span>
+            <i class="fa-solid fa-user-plus"></i>
+          </button>
+          <div class="auth-switch">
+            Already have an account? <a href="#" id="switch-to-login">Sign in</a>
+          </div>
+        </form>
+
+        <div class="auth-security-footer">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Secure internal workspace • End-to-end encrypted session</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="main-layout" class="main-layout hidden">
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <div class="brand">
+            <div class="brand-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" />
+              </svg>
+            </div>
+            <span class="brand-name">Workspace</span>
+            <span class="badge-internal">Internal</span>
+          </div>
+          <button id="btn-close-sidebar" class="btn-icon mobile-only" title="Close Sidebar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="sidebar-actions">
+          <button id="btn-new-chat" class="btn btn-new-chat">
+            <i class="fa-solid fa-plus"></i>
+            <span>New Chat</span>
+            <span class="shortcut">Ctrl+K</span>
+          </button>
+        </div>
+
+        <div class="chat-search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="chat-search" placeholder="Search conversations..." />
+        </div>
+
+        <div class="chats-history-container" id="chats-list"></div>
+
+        <div class="sidebar-footer">
+          <div class="token-meter">
+            <div class="token-meter-labels">
+              <span>Daily Quota</span>
+              <span id="token-usage-text">0 / 150k</span>
+            </div>
+            <div class="meter-bar">
+              <div id="meter-fill" class="meter-fill" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="user-profile-row">
+            <div class="user-avatar" id="user-avatar-badge">U</div>
+            <div class="user-info">
+              <span class="user-name" id="user-display-name">Loading...</span>
+              <span class="user-email" id="user-display-email">user@company.com</span>
+            </div>
+            <div class="user-actions">
+              <button id="btn-admin-panel" class="btn-icon hidden" title="Admin Dashboard">
+                <i class="fa-solid fa-gauge-high"></i>
+              </button>
+              <button id="btn-theme-toggle" class="btn-icon" title="Toggle Light/Dark Theme">
+                <i class="fa-solid fa-moon"></i>
+              </button>
+              <button id="btn-logout" class="btn-icon" title="Logout">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+      <main class="chat-main">
+        <header class="chat-topbar">
+          <div class="topbar-left">
+            <button id="btn-toggle-sidebar" class="btn-icon" title="Toggle Sidebar">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="chat-title-wrapper">
+              <span id="current-chat-title" class="chat-title">New Conversation</span>
+              <button id="btn-rename-chat" class="btn-icon btn-small" title="Rename Title">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="topbar-right">
+            <div class="model-dropdown-wrapper">
+              <button id="model-select-btn" class="model-select-btn">
+                <span class="model-dot"></span>
+                <span id="current-model-name">Claude 3.5 Sonnet</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+              <div id="model-dropdown" class="model-dropdown hidden"></div>
+            </div>
+
+            <button id="btn-system-prompt" class="btn-icon" title="Customize System Instructions">
+              <i class="fa-solid fa-sliders"></i>
+            </button>
+
+            <button id="btn-export-chat" class="btn-icon" title="Export Conversation (Markdown)">
+              <i class="fa-solid fa-arrow-down-to-bracket"></i>
+            </button>
+          </div>
+        </header>
+
+        <div id="messages-container" class="messages-container">
+          <div id="welcome-screen" class="welcome-screen">
+            <div class="welcome-badge">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" />
+              </svg>
+            </div>
+            <h1 id="welcome-greeting">Welcome</h1>
+            <p class="welcome-sub">Workplace productivity workspace.</p>
+
+            <div class="suggestion-grid">
+              <button class="suggestion-card" data-prompt="Draft a clear and persuasive status update email for my team project.">
+                <div class="suggestion-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+                <div class="suggestion-text">
+                  <h4>Draft team update</h4>
+                  <p>Write a clear, professional email</p>
+                </div>
+              </button>
+
+              <button class="suggestion-card" data-prompt="Help me review and optimize this code snippet for performance and security:">
+                <div class="suggestion-icon"><i class="fa-solid fa-code"></i></div>
+                <div class="suggestion-text">
+                  <h4>Review & optimize code</h4>
+                  <p>Find bugs, optimize performance</p>
+                </div>
+              </button>
+
+              <button class="suggestion-card" data-prompt="Summarize the key takeaways and actionable next steps from this meeting transcript:">
+                <div class="suggestion-icon"><i class="fa-solid fa-list-check"></i></div>
+                <div class="suggestion-text">
+                  <h4>Summarize notes</h4>
+                  <p>Extract decisions & action items</p>
+                </div>
+              </button>
+
+              <button class="suggestion-card" data-prompt="Help me brainstorm 5 creative strategies to solve: ">
+                <div class="suggestion-icon"><i class="fa-solid fa-lightbulb"></i></div>
+                <div class="suggestion-text">
+                  <h4>Brainstorm solutions</h4>
+                  <p>Explore creative strategic angles</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div id="chat-messages" class="chat-messages"></div>
+        </div>
+
+        <div class="chat-input-area">
+          <div class="chat-input-box">
+            <textarea
+              id="prompt-input"
+              rows="1"
+              placeholder="Type your message... (Shift + Enter for new line)"
+              autocomplete="off"
+            ></textarea>
+
+            <div class="input-controls">
+              <span id="char-counter" class="char-counter">0 / 50,000</span>
+              <button id="btn-stop-stream" class="btn-stop hidden" title="Stop Generation">
+                <i class="fa-solid fa-square"></i>
+                <span>Stop</span>
+              </button>
+              <button id="btn-send" class="btn-send" title="Send Message" disabled>
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="chat-disclaimer">
+            <span>Verify important business facts. Work data is confidential and protected.</span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="system-prompt-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-sliders"></i> System Instructions</h3>
+          <button id="btn-close-prompt-modal" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Define persona, tone, or specific instructions for this conversation:
+          </p>
+          <div class="quick-personas">
+            <span class="persona-tag" data-prompt="You are an expert senior software engineer. Provide clean, secure, and modern code with explanations.">💻 Senior Dev</span>
+            <span class="persona-tag" data-prompt="You are an executive business writer. Provide concise, polished, and structured communications.">👔 Executive</span>
+            <span class="persona-tag" data-prompt="You are a data analyst. Emphasize metrics, statistical reasoning, and clear bullet points.">📊 Analyst</span>
+            <span class="persona-tag" data-prompt="">🔄 Default</span>
+          </div>
+          <textarea id="system-prompt-input" rows="5" placeholder="e.g. Always respond in concise bullet points and provide code in TypeScript..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-save-system-prompt" class="btn btn-primary">Save Instructions</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="admin-modal" class="modal-overlay hidden">
+      <div class="modal-content modal-wide">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-gauge-high"></i> Workplace Admin & Usage Analytics</h3>
+          <button id="btn-close-admin-modal" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="admin-stats-grid">
+            <div class="stat-card">
+              <span class="stat-num" id="admin-total-users">0</span>
+              <span class="stat-lbl">Registered Colleagues</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num" id="admin-total-chats">0</span>
+              <span class="stat-lbl">Active Chats</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num" id="admin-total-tokens-today">0</span>
+              <span class="stat-lbl">Tokens Consumed Today</span>
+            </div>
+          </div>
+
+          <h4 class="section-title">Colleague Usage Breakdown</h4>
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Colleague</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Today Tokens</th>
+                  <th>Requests</th>
+                  <th>Last Active</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
